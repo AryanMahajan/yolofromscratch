@@ -9,7 +9,7 @@ schema_view = get_schema_view(
     openapi.Info(
         title="YOLO API",
         default_version='v1',
-        description="API for YOLO object detection",
+        description="API for YOLO object detection with JWT authentication",
         terms_of_service="https://www.google.com/policies/terms/",
         contact=openapi.Contact(email="contact@yolo.local"),
         license=openapi.License(name="BSD License"),
@@ -28,11 +28,15 @@ urlpatterns = [
         name="account_confirm_email",
     ),
 
-    # 2️⃣ Default dj-rest-auth routes
-    path('accounts/', include('accounts.urls')),  # your JWT, Google login routes
+    # 2️⃣ JWT and Account management routes
+    path('accounts/', include('accounts.urls')),  # JWT tokens, user/me, Google login
     path('api/auth/', include('dj_rest_auth.urls')),
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
 
+    # 3️⃣ Detection History API
+    path('', include('history.urls')),
+
+    # 4️⃣ API Documentation
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]

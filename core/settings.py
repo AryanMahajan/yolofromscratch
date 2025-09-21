@@ -259,3 +259,85 @@ LOGGING = {
         'level': 'DEBUG',
     },
 }
+# Add these settings to your core/settings.py for better WebSocket performance
+# REMOVE THE PREVIOUS DATABASE OPTIMIZATION SECTION AND USE THIS INSTEAD
+
+# Channel layers configuration for better performance
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+            "capacity": 1500,  # Increased capacity
+            "expiry": 10,      # Lower expiry for real-time
+        },
+    },
+    # Fallback to in-memory (development only)
+    "inmemory": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "CONFIG": {
+            "capacity": 300,
+            "expiry": 5,
+        }
+    }
+}
+
+# Use Redis if available, fallback to in-memory
+try:
+    import redis
+    redis.Redis(host='127.0.0.1', port=6379, db=0).ping()
+    CHANNEL_LAYERS["default"] = CHANNEL_LAYERS["default"]
+except:
+    CHANNEL_LAYERS["default"] = CHANNEL_LAYERS["inmemory"]
+
+# Improved logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'django.log',
+            'maxBytes': 1024*1024*5,  # 5MB
+            'backupCount': 3,
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'inference': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'channels': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+}
+
+# Additional performance settings
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+
+# REMOVE THE INCORRECT DATABASE OPTIMIZATION SECTION
+# Your existing DATABASES configuration is fine as-is

@@ -1,0 +1,12 @@
+model_params:
+  im_channels : 3
+  backbone_channels : 512
+  conv_spatial_size : 7
+  yolo_conv_channels : 1024
+  leaky_relu_slope : 0.1
+  fc_dim : 4096
+  fc_dropout : 0.5
+  S : 7
+  B : 2
+  use_sigmoid : True
+  use_conv : True
